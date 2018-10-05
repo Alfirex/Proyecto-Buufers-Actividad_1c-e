@@ -1,13 +1,20 @@
 package model;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 
 public class GestionDatos {
-
+	
 	public GestionDatos() {
 
 	}
@@ -18,8 +25,7 @@ public class GestionDatos {
 	      FileReader fr = new FileReader(nombreFichero); // Inicializamos la lectura por caracter
 	      BufferedReader br = new BufferedReader(fr); // Inicializamos la lectura por linea
 	   
-	      return br;
-	      
+	      return br;      
 	}
 	//TODO: Implementa una función para cerrar ficheros
 	public static void cerrarFichero(BufferedReader br) throws IOException {
@@ -98,5 +104,75 @@ public class GestionDatos {
 			  return ultimo; // devuelve la ultima
 		  }
 	}	
-
+	// Ejercicio E Libro
+	
+	// En esta funcion guardaremos el libro
+	public void guardar_libro(Libro olibro) {// Le estamos pasando un objeto
+		
+		ObjectOutputStream out = null;
+		
+		try {
+			out = new ObjectOutputStream(new FileOutputStream(olibro.identificador +".txt"));
+			out.writeObject(olibro);// Genera el fichero.
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			intentarCerrar(out);
+		}
+		
+	}
+	
+	public void intentarCerrar(Closeable aCerrar) {
+		try {
+			if(aCerrar!= null) {
+				aCerrar.close();
+			}
+		} catch (IOException ex) {
+			// TODO Auto-generated catch block
+			ex.printStackTrace(System.err);
+		}
+	}
+	
+	public Libro recuperar_libro(String identificador) {
+		Libro libro= null;
+		ObjectInputStream in = null;
+		try {
+			in = new ObjectInputStream(new FileInputStream(identificador));
+			libro = (Libro) in.readObject();
+		} catch (ClassNotFoundException ex) {
+			System.err.println("Error de fichero");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.err.println("Error IO");
+		}finally{
+			intentarCerrar(in);
+		}
+		return libro;
+	}
+	
+	public ArrayList<String> recuperar_todos(){
+		
+		ArrayList<String> libros = new ArrayList<>();
+		
+		File libr = new File("").getAbsoluteFile();
+		
+		File[] ficheros=libr.listFiles();
+		
+		if (ficheros!=null) {
+			for (int i=0; i<ficheros.length; i++) {
+				String ext = ficheros[i].getName().substring(ficheros[i].getName().lastIndexOf(".") + 1);//Obtenemos una separacion a partir del . para obtener la extension
+				if(ext.compareTo("txt") == 0) {// Comprovamos si tiene en el varchar algun txt
+					libros.add(ficheros[i].getName());
+				}				
+			}	
+		}
+		
+		return libros;
+	}
+	
 }
